@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<body>
+<div class="container" style="padding-top: 2%">
+  <div class="row">
+    <div class="col-sm-12 col-md-6">
+      <div class="card">
+        <h4 class="card-header">Logowanie</h4>
+        <form [formGroup]="form">
+          <div class="form-group space-around">
+            <label for="login">Login</label>
+            <input type="text" class="form-control" formControlName="login" id="login" placeholder="Login">
+          </div>
+          <div class="form-group space-around">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" formControlName="password" id="password" placeholder="Password">
+          </div>
+          <div class="space-around">
+            <button type="submit" class="btn btn-primary">Login</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-sm-12 col-md-6 space-around">
+      <h2>JQuery UI</h2>
+      <p>Date: <input type="text" id="datepicker"></p>
+      <h2>Angular Material</h2>
+      <mat-expansion-panel hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Tytuł mat-panel
+          </mat-panel-title>
+          <mat-panel-description>
+            Opis mat-panel
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <p>Rozszerzenie mat-panel.</p>
+      </mat-expansion-panel>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
