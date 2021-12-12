@@ -5,7 +5,7 @@
   <div class="row">
     <div class="col-sm-12 col-md-6">
       <div class="card">
-        <h4 class="card-header">Logowanie</h4>
+        <h4 class="card-header">Log in</h4>
         <form [formGroup]="form">
           <div class="form-group space-around">
             <label for="login">Login</label>
@@ -16,9 +16,27 @@
             <input type="password" class="form-control" formControlName="password" id="password" placeholder="Password">
           </div>
           <div class="space-around">
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn btn-primary" (click)="login()">Login</button>
           </div>
         </form>
+        <div class="alert alert-success" role="alert" [hidden]="!success">
+          Logged in!
+        </div>
+        <div class="alert alert-danger" role="alert" [hidden]="!unauthorized">
+          Unauthorized!
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12" style="padding-top: 1%">
+          <button type="button" class="btn btn-primary" (click)="cacheTest()">Test cache</button>
+          {{fromCache}}
+        </div>
+        <div class="col-12" style="padding-top: 1%">
+          <button type="button" class="btn btn-primary" (click)="clearCache()">Clear cache</button>
+        </div>
+        <div class="col-12" style="padding-top: 1%">
+          <button type="button" class="btn btn-primary" (click)="webSwitching()">Web switching</button>
+        </div>
       </div>
     </div>
     <div class="col-sm-12 col-md-6 space-around">
@@ -36,6 +54,7 @@
         </mat-expansion-panel-header>
         <p>Rozszerzenie mat-panel.</p>
       </mat-expansion-panel>
+      <label>Salt={{salt}}</label>
     </div>
   </div>
 </div>
