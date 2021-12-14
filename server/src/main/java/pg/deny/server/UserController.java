@@ -23,13 +23,13 @@ public class UserController {
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Boolean> login(@RequestBody LoginDto loginDto) {
-        boolean result = userService.loginUser(loginDto);
+        var result = userService.loginUser(loginDto);
         return new ResponseEntity<>(result, result ? HttpStatus.OK : HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping(value = "/salt/{username}")
     public ResponseEntity<String> getUserSalt(@PathVariable String username) {
-        User user = userService.findUser(username);
+        var user = userService.findUser(username);
         return new ResponseEntity<>(user == null ? Strings.EMPTY : user.getSalt(), HttpStatus.OK);
     }
 

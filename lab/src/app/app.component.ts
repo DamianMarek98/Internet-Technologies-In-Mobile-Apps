@@ -3,7 +3,9 @@ import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import $ from 'jquery';
 import * as sha1 from 'js-sha1';
 import {CacheService} from "../services/cache.service";
+import {HttpClient} from "@angular/common/http";
 
+//todo, wybór strony po wadze, cache po stronie servera
 
 @Component({
   selector: 'app-root',
@@ -18,7 +20,7 @@ export class AppComponent implements OnInit {
   success = false;
   fromCache: any = '';
 
-  constructor(private formBuilder: FormBuilder, private cacheService: CacheService) {
+  constructor(private formBuilder: FormBuilder, private cacheService: CacheService, private http: HttpClient) {
   }
 
   ngOnInit(): void {
@@ -36,7 +38,7 @@ export class AppComponent implements OnInit {
       new Promise<boolean>((resolve, reject) => {
         this.salt = value;
         if (this.salt && this.salt !== '') {
-          let passwordPlusSalt = sha1(this.form.get('password').value) + this.salt;
+          let passwordPlusSalt = sha1(sha1(this.form.get('password').value) + this.salt);
           let post = $.post({
             url: "http://localhost:8080/user/login", headers: {
               'Accept': 'application/json',
@@ -110,30 +112,49 @@ export class AppComponent implements OnInit {
     this.cacheService.clearCache();
   }
 
+  sites: Site[] = [{site: 'www.wikipedia.pl', time: 0}, {site: 'www.trojmiasto.pl', time: 0}, {site: 'www.allegro.pl', time: 0}]
   public async webSwitching() {
-    let sites: string[] = ['www.gdansk.pl', 'www.sopot.pl', 'www.gdynia.pl'];
-    let times: number[] = [];
-    for (const url of sites) {
-      let startTime = performance.now();
-      $.ajax({url: 'https://' + url,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": "true",
-          "Access-Control-Allow-Methods": "GET,HEAD,OPTIONS,POST,PUT",
-          "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-        },
-        success: function (result) {
-          times.push(performance.now() - startTime);
-      },
-        error: function(result){
-          alert('timeout/error');
-        }})
-      console.log(times);
-      console.log("Posortowano: " + times.sort(this.compareNumbers))
+    for (const site of this.sites) {
+      await this.ping(site.site).then((res) => {
+        site.time = res;
+      })
     }
   }
 
-  compareNumbers(a, b) {
-    return a - b
+  test() {
+    this.sites.sort(this.compareSites)
+    console.log("Posortowano: ");
+    for (const site of this.sites) {
+      console.log(site.site + " czas: " + site.time);
+    }
   }
+
+  compareSites(s1: Site, s2: Site) {
+    if (s1.time > s2.time) {
+      return 1;
+    }
+
+    if (s1.time < s2.time) {
+      return -1;
+    }
+
+    return 0;
+  }
+
+  ping(ip): Promise<number> {
+    return new Promise<number> ((resolve, reject) => {
+      let img = new Image();
+      img.onload = function() {};
+      img.onerror = function() {};
+
+      let startTime = performance.now();
+      img.src = "http://" + ip;
+      resolve((performance.now() - startTime) / 1000);
+    })
+  }
+}
+
+export interface Site {
+  site: string;
+  time: number;
 }

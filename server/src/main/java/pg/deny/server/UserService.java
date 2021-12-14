@@ -18,10 +18,16 @@ public class UserService {
 
     @PostConstruct
     private void initializeUser() {
-        User user = new User();
+        var user = new User();
         user.setUsername("test");
         user.setPassword(hashText("12345"));
         user.setSalt(generateSalt());
+        saveUser(user);
+
+        var user2 = new User();
+        user2.setUsername("admin");
+        user2.setPassword(hashText("admin"));
+        user2.setSalt(generateSalt());
         saveUser(user);
     }
 
@@ -34,10 +40,10 @@ public class UserService {
     }
 
     public String generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] saltArr = new byte[16];
+        var random = new SecureRandom();
+        var saltArr = new byte[16];
         random.nextBytes(saltArr);
-        Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+        var encoder = Base64.getUrlEncoder().withoutPadding();
         return encoder.encodeToString(saltArr);
     }
 
@@ -46,7 +52,7 @@ public class UserService {
     }
 
     public boolean loginUser(LoginDto loginDto) {
-        User user = findUser(loginDto.getUsername());
-        return user != null && hashText(loginDto.getPassword()).equals(hashText(user.getPassword() + user.getSalt()));
+        var user = findUser(loginDto.getUsername());
+        return user != null && hashText(loginDto.getPassword()).equals(hashText(hashText(user.getPassword() + user.getSalt())));
     }
 }
