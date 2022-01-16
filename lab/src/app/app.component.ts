@@ -5,8 +5,6 @@ import * as sha1 from 'js-sha1';
 import {CacheService} from "../services/cache.service";
 import {HttpClient} from "@angular/common/http";
 
-//todo, wybór strony po wadze, cache po stronie servera
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -85,34 +83,33 @@ export class AppComponent implements OnInit {
   }
 
   cacheTest() {
-    let url = "http://localhost:8080/user/cache-test";
-    if (this.cacheService.recordExists(url)) {
-      this.fromCache = 'Obtained form cache: ' + this.cacheService.get(url);
-    } else {
-      new Promise<any>((resolve, reject) => {
-        console.log(this.form.get('login').value)
-        let get = $.get({
-          url: url,
-          error: function (jqXHR, textStatus, errorThrown) {
-            console.log(textStatus);
-            reject();
-          }
-        });
-        get.done(function (data) {
-          resolve(data);
-        });
-      }).then((value) => {
-        this.fromCache = 'Obtained form request: ' + value;
-        this.cacheService.set(url, value);
-      })
-    }
+    let url = "http://localhost:8080/user/cache-test/1";
+    new Promise<any>((resolve, reject) => {
+      console.log(this.form.get('login').value)
+      let get = $.get({
+        url: url,
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log(textStatus);
+          reject();
+        }
+      });
+      get.done(function (data) {
+        resolve(data);
+      });
+    }).then((value) => {
+      this.fromCache = 'Obtained form request: ' + value;
+    })
   }
 
   clearCache(): void {
     this.cacheService.clearCache();
   }
 
-  sites: Site[] = [{site: 'www.wikipedia.pl', time: 0}, {site: 'www.trojmiasto.pl', time: 0}, {site: 'www.allegro.pl', time: 0}]
+  sites: Site[] = [{site: 'www.wikipedia.pl', time: 0, weight: 0}, {site: 'www.trojmiasto.pl', time: 0, weight: 0}, {
+    site: 'www.allegro.pl',
+    time: 0, weight: 0
+  }]
+
   public async webSwitching() {
     for (const site of this.sites) {
       await this.ping(site.site).then((res) => {
@@ -122,30 +119,56 @@ export class AppComponent implements OnInit {
   }
 
   test() {
+    let sum = 0;
+    let weightSum = 0;
+    this.sites.forEach((site) => {
+      sum += site.time;
+    })
+    this.sites.forEach((site) => {
+      site.weight = sum/site.time;
+      weightSum += site.weight;
+    })
     this.sites.sort(this.compareSites)
-    console.log("Posortowano: ");
-    for (const site of this.sites) {
-      console.log(site.site + " czas: " + site.time);
-    }
+    console.log(this.sites);
+    this.getSiteOnWeight(weightSum);
+  }
+
+  getSiteOnWeight(weightSum: number) {
+    let min = Math.ceil(0);
+    let max = Math.floor(weightSum);
+    let res = Math.floor(Math.random() * (max - min)) + min;
+    let chosenSite = null;
+    console.log('rand: ' + res);
+    this.sites.forEach((site) => {
+      res -= site.weight;
+      if (chosenSite === null && res <= 0) {
+        chosenSite = site;
+      }
+    })
+
+    console.log('Chosen site: ');
+    console.log(chosenSite);
   }
 
   compareSites(s1: Site, s2: Site) {
-    if (s1.time > s2.time) {
-      return 1;
+    if (s1.weight > s2.weight) {
+      return -1;
     }
 
-    if (s1.time < s2.time) {
-      return -1;
+    if (s1.weight < s2.weight) {
+      return 1;
     }
 
     return 0;
   }
 
   ping(ip): Promise<number> {
-    return new Promise<number> ((resolve, reject) => {
+    return new Promise<number>((resolve, reject) => {
       let img = new Image();
-      img.onload = function() {};
-      img.onerror = function() {};
+      img.onload = function () {
+      };
+      img.onerror = function () {
+      };
 
       let startTime = performance.now();
       img.src = "http://" + ip;
@@ -157,4 +180,5 @@ export class AppComponent implements OnInit {
 export interface Site {
   site: string;
   time: number;
+  weight: number;
 }
